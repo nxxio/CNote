@@ -43,6 +43,14 @@ class TabBar(QTabBar):
 
         return self.currentIndex()
 
+
+    def change_tab_name(self, i, filepath):
+
+        self.setTabText(i,filepath.split('/')[-1])
+
+    def get_tab_name(self,i):
+        return self.tabs[i]['TabName']
+
 if __name__ == '__main__':
     print('не то')
     sys.exit()

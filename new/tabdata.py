@@ -8,7 +8,14 @@ class TabData(QStackedWidget):
         
         self.data_tabs = []     #{'TextEdit': ' ','FilePath': ' '})
         self.InitTabData()
+        
 
+    #def control_text_change(self):
+     #   self.data_tabs[self.currentIndex()]['TextEdit'].textChanged.connect(self.text_changed)
+
+    #def text_changed(self):
+     #   self.data_tabs[self.currentIndex()]['TxtCh'] = True
+      #  print(True)
     
     def InitTabData(self):
 
@@ -42,14 +49,13 @@ class TabData(QStackedWidget):
         if save_as == False:
 
             if fp == 'Start_tab' or fp == 'NewTab':
-                self.save_data(save_as= True)
+                return self.save_data(save_as= True)
             else:
                 try:
                     file = open(fp, 'w',encoding= 'utf8')
                     file.write(self.data_tabs[index]['TextEdit'].toPlainText())
                     file.close()
                 except Exception:
-                    print(-1)
                     return -1
 
         elif save_as == True:
@@ -57,22 +63,25 @@ class TabData(QStackedWidget):
             fp = QtWidgets.QFileDialog.getSaveFileName()[0]
         
             if fp == '':
+                return -2
             # файл не выбран
-                return - 2
 
             elif len(fp.rsplit('.')) >= 1:
                 pass   #если задан тип файла
 
             else:
-                fp += '.txt'                          #если не задан, по дефолту сохраняем в txt
+                fp += '.txt'                         #если не задан, по дефолту сохраняем в txt
             
             try:
+                self.data_tabs[index]['FilePath'] = fp
                 f = open(fp, 'w',encoding= 'utf8')
                 f.write(self.data_tabs[index]['TextEdit'].toPlainText())
                 f.close()
+                return [index,fp]
+                
+
             except Exception:
-                print(-3)
-                return(-3)
+                return -3
 
 
 

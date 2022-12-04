@@ -1,6 +1,8 @@
-import sys, io, tabbar, textedit, tabdata
-from PyQt6 import QtCore, QtGui, QtWidgets
+import sys, io, tabbar, tabdata
+from PyQt6 import  QtWidgets
 from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import QMessageBox as QM
+
 
 class MainWidget(QWidget):
 
@@ -19,6 +21,7 @@ class MainWidget(QWidget):
         #self.setLayout(main_layout)
         MainWidget.setLayout(self,main_layout)
         self.control_tabs()
+        
         
 
     def New_Tab(self,file=None, filePath = None):
@@ -51,21 +54,32 @@ class MainWidget(QWidget):
 
     def Close_Tab(self,index):
 
+
         self.tab_bar.setCurrentIndex(index)
         self.Switch_tabs(index)
-        if self.tab_data.getStatus(index) == True:
-            
-            code = self.Save_file()
-            if code == -2 or code == -3 or code == -1:
-                return
+
+        if self.tab_data.getStatus(index) == True:          # если в блокноте что то писали спрашиваем надо ли сохранить
+
+            reply = QM.question(self,'Save?','Save ' + self.tab_bar.get_tab_name(index),QM.StandardButton.Yes | QM.StandardButton.No, QM.StandardButton.Yes)
+            if reply == QM.StandardButton.Yes:              # если ответили что сохранить надо
+                code = self.Save_file()                     # сохраняем
+                if code == -3 or code == -1:  
+                    
+                    QMessageBox.information(self,'Error', 'Ошибка сохранения',QM.StandardButton.Ok) # если есть ошибки
+                    return
+
+                elif code == -2:
+                    return                                  # если не выбран файл куда сохранять ничего не делаем
+                else:                                       
+                    self.tab_bar.del_tab(index)             # если ошибок нет, мы все сохранили, удаляем вкладку
+                    self.tab_data.del_tabData(index)
             else:
-                self.tab_bar.del_tab(index)
+                self.tab_bar.del_tab(index)                 # если ответили что сохранять не нало, просто удаляем
                 self.tab_data.del_tabData(index)
 
         else:
-            self.tab_bar.del_tab(index)
+            self.tab_bar.del_tab(index)                     # если документ не  изменялся, удаляем вкладку
             self.tab_data.del_tabData(index)
-
 
     def Open_file(self):
         
@@ -81,12 +95,26 @@ class MainWidget(QWidget):
 
     def Save_as_file(self):
         
-       return self.tab_data.save_data(save_as= True)
+        code = self.tab_data.save_data(save_as= True)
+        if type(code) == list:
+            self.tab_bar.change_tab_name(code[0],code[1])
+            return None
+        else:
+            if code == -1 or code == -3:
+                QMessageBox.information(self,'Error', 'Ошибка сохранения',QM.StandardButton.Ok)
+            return code
 
 
     def Save_file(self):
 
-        return self.tab_data.save_data(save_as= False)
+        code = self.tab_data.save_data(save_as= False)
+        if type(code) == list:
+            self.tab_bar.change_tab_name(code[0],code[1])
+            return None
+        else:
+            if code == -1 or code == -3:
+                QMessageBox.information(self,'Error', 'Ошибка сохранения',QM.StandardButton.Ok)
+            return code
 
 
 

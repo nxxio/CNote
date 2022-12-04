@@ -6,6 +6,7 @@ class PlainTextEdit(QPlainTextEdit):
 
     def __init__(self):
         super(PlainTextEdit, self).__init__()
+        
 
 
 if __name__ == '__main__':
