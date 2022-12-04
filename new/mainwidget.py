@@ -81,45 +81,12 @@ class MainWidget(QWidget):
 
     def Save_as_file(self):
         
-        fp = QtWidgets.QFileDialog.getSaveFileName()[0]
-        
-        if fp == '':
-            # файл не выбран
-            return - 2
-
-        elif len(fp.rsplit('.')) > 1:
-            f = open(fp, 'w',encoding= 'utf8')   #если задан тип файла
-
-        else:
-            fp += '.txt'                          #если не задан, по дефолту сохраняем в txt
-            f = open(fp, 'w',encoding= 'utf8')
-
-        try:
-            self.tab_data.save_data(file= f, filePath= fp, i = self.tab_bar.getIndex())
-            f.close()
-
-        except Exception:
-
-            return -3
+       return self.tab_data.save_data(save_as= True)
 
 
     def Save_file(self):
-    
-        try:
-            fp = self.tab_data.getFilePath()
-            if fp == 'Start_tab' or fp == 'NewTab':
 
-                return self.Save_as_file()
-                
-            else:
-
-                f = open(fp,'w',encoding= 'utf8')
-                self.tab_data.save_data(file = f, filePath= fp, i= self.tab_bar.getIndex())   
-                f.close()
-                
-        except Exception:
-            print(-1)
-            return -1
+        return self.tab_data.save_data(save_as= False)
 
 
 

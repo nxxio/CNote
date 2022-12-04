@@ -1,12 +1,12 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtWidgets import *
-import sys, io
+import sys, io, textedit
 
 class TabData(QStackedWidget):
     def __init__(self):
         super(TabData, self).__init__()
         
-        self.data_tabs = []
+        self.data_tabs = []     #{'TextEdit': ' ','FilePath': ' '})
         self.InitTabData()
 
     
@@ -34,12 +34,46 @@ class TabData(QStackedWidget):
             self.data_tabs[i]['TextEdit'].setPlainText(file.read())
 
 
-    def save_data(self, i, file):
+    def save_data(self, save_as):
 
-        if type(file) == io.TextIOWrapper:
-             file.write(self.data_tabs[i]['TextEdit'].toPlainText())
-        else:
-            print('error')
+        index = self.currentIndex()
+        fp = self.data_tabs[index]['FilePath']
+
+        if save_as == False:
+
+            if fp == 'Start_tab' or fp == 'NewTab':
+                self.save_data(save_as= True)
+            else:
+                try:
+                    file = open(fp, 'w',encoding= 'utf8')
+                    file.write(self.data_tabs[index]['TextEdit'].toPlainText())
+                    file.close()
+                except Exception:
+                    print(-1)
+                    return -1
+
+        elif save_as == True:
+
+            fp = QtWidgets.QFileDialog.getSaveFileName()[0]
+        
+            if fp == '':
+            # файл не выбран
+                return - 2
+
+            elif len(fp.rsplit('.')) >= 1:
+                pass   #если задан тип файла
+
+            else:
+                fp += '.txt'                          #если не задан, по дефолту сохраняем в txt
+            
+            try:
+                f = open(fp, 'w',encoding= 'utf8')
+                f.write(self.data_tabs[index]['TextEdit'].toPlainText())
+                f.close()
+            except Exception:
+                print(-3)
+                return(-3)
+
 
 
     def visible_data(self, index):
