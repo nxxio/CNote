@@ -1,21 +1,15 @@
-from PyQt6 import QtCore, QtGui, QtWidgets
-from PyQt6.QtWidgets import *
-import sys, io, textedit
+from PyQt6.QtWidgets import QStackedWidget, QFileDialog
+import sys, textedit
 
 class TabData(QStackedWidget):
-    def __init__(self):
+
+    def __init__(self,flag = None):
         super(TabData, self).__init__()
         
         self.data_tabs = []     #{'TextEdit': ' ','FilePath': ' '})
-        self.InitTabData()
+        if flag == True:
+            self.InitTabData()
         
-
-    #def control_text_change(self):
-     #   self.data_tabs[self.currentIndex()]['TextEdit'].textChanged.connect(self.text_changed)
-
-    #def text_changed(self):
-     #   self.data_tabs[self.currentIndex()]['TxtCh'] = True
-      #  print(True)
     
     def InitTabData(self):
 
@@ -55,12 +49,13 @@ class TabData(QStackedWidget):
                     file = open(fp, 'w',encoding= 'utf8')
                     file.write(self.data_tabs[index]['TextEdit'].toPlainText())
                     file.close()
+                    self.changeStatus(index)
                 except Exception:
                     return -1
 
         elif save_as == True:
 
-            fp = QtWidgets.QFileDialog.getSaveFileName()[0]
+            fp = QFileDialog.getSaveFileName()[0]
         
             if fp == '':
                 return -2
@@ -77,6 +72,7 @@ class TabData(QStackedWidget):
                 f = open(fp, 'w',encoding= 'utf8')
                 f.write(self.data_tabs[index]['TextEdit'].toPlainText())
                 f.close()
+                self.changeStatus(index)
                 return [index,fp]
                 
 
@@ -96,16 +92,17 @@ class TabData(QStackedWidget):
 
     def getStatus(self,i):
 
-        return self.data_tabs[i]['TextEdit'].document().isModified()
+        return self.data_tabs[i]['TextEdit'].document().isModified() and  not self.data_tabs[i]['TextEdit'].document().isEmpty()
+
+    def changeStatus(self,i):
+        
+        self.data_tabs[i]['TextEdit'].document().setModified(False)
 
 
     def del_tabData(self, index):
         
         self.removeWidget(self.data_tabs[index]['TextEdit'])
         del self.data_tabs[index]
-
-
-    
 
         
 

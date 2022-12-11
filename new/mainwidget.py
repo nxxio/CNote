@@ -1,24 +1,27 @@
 import sys, io, tabbar, tabdata
-from PyQt6 import  QtWidgets
-from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QFileDialog
 from PyQt6.QtWidgets import QMessageBox as QM
 
 
 class MainWidget(QWidget):
 
-    def __init__(self):
+    def __init__(self, flag = None):
         super(MainWidget,self).__init__()
 
-        self.tab_bar = tabbar.TabBar()
-        self.tab_data = tabdata.TabData()
+        if flag == True:
 
-        main_layout = QtWidgets.QVBoxLayout()
+            self.tab_bar = tabbar.TabBar(flag)
+            self.tab_data = tabdata.TabData(flag)
+        else:
+            self.tab_bar = tabbar.TabBar()
+            self.tab_data = tabdata.TabData()
+
+        main_layout = QVBoxLayout()
         main_layout.setSpacing(0)
 
         main_layout.addWidget(self.tab_bar)
         main_layout.addWidget(self.tab_data)
 
-        #self.setLayout(main_layout)
         MainWidget.setLayout(self,main_layout)
         self.control_tabs()
         
@@ -52,6 +55,7 @@ class MainWidget(QWidget):
             self.tab_data.visible_data(index)
 
 
+
     def Close_Tab(self,index):
 
 
@@ -59,20 +63,24 @@ class MainWidget(QWidget):
         self.Switch_tabs(index)
 
         if self.tab_data.getStatus(index) == True:          # если в блокноте что то писали спрашиваем надо ли сохранить
+           
+            reply = QM.question(self,'Warning','Save ' + self.tab_bar.get_tab_name(index) + '?', QM.StandardButton.Yes| QM.StandardButton.No | QM.StandardButton.Cancel, QM.StandardButton.Yes)
 
-            reply = QM.question(self,'Save?','Save ' + self.tab_bar.get_tab_name(index),QM.StandardButton.Yes | QM.StandardButton.No, QM.StandardButton.Yes)
             if reply == QM.StandardButton.Yes:              # если ответили что сохранить надо
                 code = self.Save_file()                     # сохраняем
                 if code == -3 or code == -1:  
                     
                     QMessageBox.information(self,'Error', 'Ошибка сохранения',QM.StandardButton.Ok) # если есть ошибки
-                    return
+                    return -4
 
                 elif code == -2:
-                    return                                  # если не выбран файл куда сохранять ничего не делаем
+                    return -4                               # если не выбран файл куда сохранять ничего не делаем
                 else:                                       
                     self.tab_bar.del_tab(index)             # если ошибок нет, мы все сохранили, удаляем вкладку
                     self.tab_data.del_tabData(index)
+
+            elif reply == QM.StandardButton.Cancel:
+                return - 4
             else:
                 self.tab_bar.del_tab(index)                 # если ответили что сохранять не нало, просто удаляем
                 self.tab_data.del_tabData(index)
@@ -81,9 +89,10 @@ class MainWidget(QWidget):
             self.tab_bar.del_tab(index)                     # если документ не  изменялся, удаляем вкладку
             self.tab_data.del_tabData(index)
 
+
     def Open_file(self):
         
-        fnames = QtWidgets.QFileDialog.getOpenFileNames()
+        fnames = QFileDialog.getOpenFileNames()
         list_filePath = fnames[0]
 
         for i in range(len(list_filePath)):
@@ -92,6 +101,12 @@ class MainWidget(QWidget):
             self.New_Tab(file,list_filePath[i])
             file.close()
 
+    def argv_Open(self,filePath):
+
+        file = open(filePath,'r',encoding='utf8')
+        self.tab_bar.add_new_tab(filePath.split('\\')[-1])
+        self.tab_data.add_new_tabData(file,filePath)
+        file.close()
 
     def Save_as_file(self):
         
